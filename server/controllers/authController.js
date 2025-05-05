@@ -1,0 +1,73 @@
+import jwt from "jsonwebtoken";
+import { createUser, getUserByEmail } from "../models/User.js";
+
+const generateToken = (userId)=>{
+    return jwt.sign({userId}, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1h",
+    })
+}
+
+export const register = async (req, res)=> {
+    const {email, password, name, role} = req.body
+    console.log('email', email)
+    try {
+        const exist = getUserByEmail(email);
+        if (exist.email) {
+            return res.status(401).json({msg: "user exists", exist: exist})
+            
+        }
+        const user = createUser(email, password, name, role)
+        const token = generateToken(user.id)
+        res.status(201).json({
+            status: "success",
+            data: {
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    name: user.name,
+                    role: user.role,
+                },
+                token,
+            },
+            message: "User created successfully!",
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            status: "error",
+            message: "Internal server error",
+        });
+    }
+}
+
+export const login = async (req, res)=> {
+    const {email, password} = req.body
+    try {
+        const user = await getUserByEmail(email);
+        if (!user) {
+            return res.status(401).json({msg: "user not found"})
+        }
+        const isMatch = await bcrypt.compare(password, user.password)
+        if (!isMatch) {
+            return res.status(401).json({msg: "invalid credentials"})
+        }
+        const token = generateToken(user.id)
+        res.status(200).json({
+            status: "success",
+            data: {
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    role: user.role,
+                },
+                token,
+            },
+            message: "User logged in successfully!",
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: "error",
+            message: "Internal server error",
+        });
+    }
+}
