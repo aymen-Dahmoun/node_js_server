@@ -4,9 +4,9 @@ import arcjet, {tokenBucket, shield, detectBot} from "@arcjet/node";
 import { config } from "dotenv";
 
 config();
-
+console.log('ENV', process.env.ARKJET_ENV)
 export const arcjetClient = arcjet({
-    key: process.env.ARCJET_API_KEY,
+    key: process.env.ARKJET_KEY,
     characteristics: ['ip.src'],
     rules: [
         shield({

@@ -3,7 +3,7 @@ import morgan from 'morgan';
 import helmet from 'helmet';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import router from './routes/ProductRoutes.js';
+import ProductsRouter from './routes/ProductRoutes.js';
 import { db } from './config/database.js';
 import { arcjetClient } from './lib/arcjet.js';
 import { authRouter } from './routes/authRoutes.js';
@@ -19,30 +19,30 @@ app.use(morgan('dev'));
 app.use(helmet());
 
 
-// app.use(async (req, res, next) => {
-//     try {
-//         const decision = await arcjetClient.protect(req, {
-//             requested: 1,
-//         })
-//         if (decision.isDenied) {
-//             if (decision.reason.isRateLimit()) {
-//                 return res.status(429).json({ error: 'Too many requests' });
-//             }
-//             else if (decision.reason.isBot()) {
-//                 return res.status(403).json({ error: 'Bot detected' });
-//             }
-//             else if (decision.reason.isShield()) {
-//                 return res.status(403).json({ error: 'Shielded request' });
-//             }
+app.use(async (req, res, next) => {
+    try {
+        const decision = await arcjetClient.protect(req, {
+            requested: 1,
+        })
+        if (decision.isDenied) {
+            if (decision.reason.isRateLimit()) {
+                return res.status(429).json({ error: 'Too many requests' });
+            }
+            else if (decision.reason.isBot()) {
+                return res.status(403).json({ error: 'Bot detected' });
+            }
+            else if (decision.reason.isShield()) {
+                return res.status(403).json({ error: 'Shielded request' });
+            }
 
-//         }
-//         next();
-//     } catch (error) {
-//         console.error('Error in middleware:', error);
-//         }
-//     }
-// )
-app.use("/api/products", router);
+        }
+        next();
+    } catch (error) {
+        console.error('Error in middleware:', error);
+        }
+    }
+)
+app.use("/api/products", ProductsRouter);
 app.use("/api/auth", authRouter);
 
 async function initDb() {
