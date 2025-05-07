@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { createUser, getUserByEmail } from "../models/User.js";
+import bcrypt from "bcryptjs";
 
 const generateToken = (userId)=>{
     return jwt.sign({userId}, process.env.ACCESS_TOKEN_SECRET, {
@@ -9,14 +10,15 @@ const generateToken = (userId)=>{
 
 export const register = async (req, res)=> {
     const {email, password, name, role} = req.body
-    console.log('email', email)
     try {
-        const exist = getUserByEmail(email);
+        const exist = await getUserByEmail(email);
+        // console.log('exist', exist)
         if (exist.email) {
+            // console.log("user exists")
             return res.status(401).json({msg: "user exists", exist: exist})
-            
         }
-        const user = createUser(email, password, name, role)
+        const user = await createUser(email, password, name, role)
+        // console.log('user', user)
         const token = generateToken(user.id)
         res.status(201).json({
             status: "success",
@@ -65,6 +67,7 @@ export const login = async (req, res)=> {
             message: "User logged in successfully!",
         });
     } catch (error) {
+        console.error("Error logging in user:", error);
         res.status(500).json({
             status: "error",
             message: "Internal server error",

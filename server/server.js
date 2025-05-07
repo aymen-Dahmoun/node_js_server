@@ -3,10 +3,10 @@ import morgan from 'morgan';
 import helmet from 'helmet';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import router from './productRoutes/ProductRoutes.js';
+import router from './routes/ProductRoutes.js';
 import { db } from './config/database.js';
 import { arcjetClient } from './lib/arcjet.js';
-import { authRouter } from './productRoutes/authRoutes.js';
+import { authRouter } from './routes/authRoutes.js';
 
 dotenv.config();
 const PORT = process.env.PORT || 3001;
